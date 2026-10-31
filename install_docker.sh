@@ -4,8 +4,6 @@ cat << 'EOF' > /root/manage_docker.sh
 # Docker & Docker Compose 综合管理脚本 (带快捷键 dk & 返回键支持)
 # =========================================================
 
-set -e
-
 RED="\033[31m"
 GREEN="\033[32m"
 YELLOW="\033[33m"
@@ -34,14 +32,12 @@ fi
 setup_shortcut() {
     CURRENT_SCRIPT=$(readlink -f "$0" 2>/dev/null || echo "$0")
 
-    # 如果当前脚本不在 /usr/local/bin 目录，自动复制进去
     if [[ "$CURRENT_SCRIPT" != "$TARGET_SCRIPT" && -f "$CURRENT_SCRIPT" ]]; then
-        cp -f "$CURRENT_SCRIPT" "$TARGET_SCRIPT"
-        chmod +x "$TARGET_SCRIPT"
+        cp -f "$CURRENT_SCRIPT" "$TARGET_SCRIPT" 2>/dev/null || true
+        chmod +x "$TARGET_SCRIPT" 2>/dev/null || true
     fi
 
-    # 建立软链接 /usr/local/bin/dk
-    if [[ ! -L "$SHORTCUT_LINK" || "$(readlink -f "$SHORTCUT_LINK")" != "$TARGET_SCRIPT" ]]; then
+    if [[ ! -L "$SHORTCUT_LINK" || "$(readlink -f "$SHORTCUT_LINK" 2>/dev/null)" != "$TARGET_SCRIPT" ]]; then
         ln -sf "$TARGET_SCRIPT" "$SHORTCUT_LINK" 2>/dev/null || true
         chmod +x "$SHORTCUT_LINK" 2>/dev/null || true
     fi
@@ -67,14 +63,15 @@ detect_os() {
         command -v dnf >/dev/null 2>&1 || PM="yum"
     else
         echo -e "${RED}[错误] 未识别的 Linux 发行版，仅支持 Debian/Ubuntu/RHEL/CentOS 系列。${PLAIN}"
-        exit 1
+        back_to_menu
+        return 1
     fi
 }
 
 # 选项 1: 安装 Docker & Docker Compose
 install_docker() {
     echo -e "${GREEN}>>> 正在准备基础依赖并安装 Docker 官方套件...${PLAIN}"
-    detect_os
+    detect_os || return
 
     if [ "$PM" = "apt-get" ]; then
         apt-get update -y
@@ -99,7 +96,7 @@ install_docker() {
 # 选项 2: 更新 Docker 核心组件
 update_docker() {
     echo -e "${GREEN}>>> 正在检查并更新 Docker 核心组件...${PLAIN}"
-    detect_os
+    detect_os || return
 
     if [ "$PM" = "apt-get" ]; then
         apt-get update -y
