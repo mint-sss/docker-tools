@@ -21,28 +21,16 @@ Docker &amp; Docker Compose 综合管理脚本 (安装/更新/彻底卸载)
 
 ### 方式 1：推荐单行直接执行（轻量、无需落地文件）
 
-* **GitHub 直连（海外服务器）：**
   ```bash
   bash <(curl -fsSL [https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh))
-  ```
-
-* **国内加速节点（大陆服务器）：**
-  ```bash
-  bash <(curl -fsSL [https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh))
   ```
 
 ---
 
 ### 方式 2：经典下载保存并执行（wget 方式）
 
-* **GitHub 直连（海外服务器）：**
   ```bash
   wget -O install_docker.sh "[https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh)" && chmod +x install_docker.sh && ./install_docker.sh
-  ```
-
-* **国内加速节点（大陆服务器）：**
-  ```bash
-  wget -O install_docker.sh "[https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh)" && chmod +x install_docker.sh && ./install_docker.sh
   ```
 
 ---
@@ -54,9 +42,20 @@ Docker &amp; Docker Compose 综合管理脚本 (安装/更新/彻底卸载)
   curl -fsSL [https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh) -o install_docker.sh && chmod +x install_docker.sh && ./install_docker.sh
   ```
 
-* **国内加速节点（大陆服务器）：**
+### 国内加速节点
+
+* **国内加速节点：**
   ```bash
   curl -fsSL [https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh) -o install_docker.sh && chmod +x install_docker.sh && ./install_docker.sh
+  ```
+* **国内加速节点：**
+  ```bash
+  bash <(curl -fsSL [https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh))
+  ```
+  
+* **国内加速节点：**
+  ```bash
+  wget -O install_docker.sh "[https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh](https://ghproxy.net/https://raw.githubusercontent.com/mint-sss/docker-tools/main/install_docker.sh)" && chmod +x install_docker.sh && ./install_docker.sh
   ```
 
 ---
