@@ -43,7 +43,24 @@ setup_shortcut() {
     fi
 }
 
-# 3. 通用返回键函数
+# 3. 配置 live-restore（平滑重启模式，避免更新或重启 dockerd 时容器中断）
+configure_live_restore() {
+    mkdir -p /etc/docker
+    DAEMON_JSON="/etc/docker/daemon.json"
+    
+    if [ ! -f "$DAEMON_JSON" ]; then
+        cat << 'DOCKER_EOF' > "$DAEMON_JSON"
+{
+  "live-restore": true
+}
+DOCKER_EOF
+    elif ! grep -q '"live-restore"' "$DAEMON_JSON"; then
+        # 如果文件已存在但没有配置 live-restore，自动注入
+        sed -i '1s/{/{\n  "live-restore": true,/' "$DAEMON_JSON" 2>/dev/null || true
+    fi
+}
+
+# 4. 通用返回键函数
 back_to_menu() {
     echo ""
     read -rp "按回车键 [Enter] 返回主菜单..." dummy
@@ -83,11 +100,14 @@ install_docker() {
     echo -e "${YELLOW}>>> 正在通过官方源拉取并安装 Docker Engine & Compose Plugin...${PLAIN}"
     curl -fsSL https://get.docker.com | bash
 
+    # 启用开机自启与 live-restore 平滑保活机制
+    configure_live_restore
     systemctl daemon-reload
     systemctl enable docker
-    systemctl start docker
+    systemctl restart docker
 
     echo -e "\n${GREEN}[成功] Docker 及 Docker Compose 安装完成！${PLAIN}"
+    echo -e "${SKYBLUE}[提示] 已开启守护进程开机自启与容器 live-restore 保活保护。${PLAIN}"
     echo -e "${SKYBLUE}[提示] 以后在终端任意路径直接输入 ${GREEN}dk${SKYBLUE} 即可随时呼出此管理菜单。${PLAIN}"
     check_status_info
     back_to_menu
@@ -98,6 +118,9 @@ update_docker() {
     echo -e "${GREEN}>>> 正在检查并更新 Docker 核心组件...${PLAIN}"
     detect_os || return
 
+    # 升级前确保 live-restore 处于开启状态，避免升级时容器断连
+    configure_live_restore
+
     if [ "$PM" = "apt-get" ]; then
         apt-get update -y
         apt-get --only-upgrade install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -106,6 +129,7 @@ update_docker() {
         $PM update -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
     fi
 
+    systemctl daemon-reload
     systemctl restart docker
     echo -e "\n${GREEN}[成功] Docker 核心组件已升级至软件源最新版本！${PLAIN}"
     check_status_info
@@ -119,6 +143,9 @@ check_status_info() {
         echo -e "服务状态: ${GREEN}运行中 (Active)${PLAIN}"
         docker --version 2>/dev/null || echo -e "${RED}Docker 命令行未就绪${PLAIN}"
         docker compose version 2>/dev/null || echo -e "${RED}Docker Compose 插件未就绪${PLAIN}"
+        if [ -f "/etc/docker/daemon.json" ] && grep -q '"live-restore": true' "/etc/docker/daemon.json"; then
+            echo -e "保活状态: ${GREEN}live-restore 已启用 (升级/重载时容器不中断)${PLAIN}"
+        fi
     else
         echo -e "服务状态: ${RED}未运行或未安装${PLAIN}"
     fi
